@@ -29,15 +29,18 @@
 
     const links = treeLayout(rootNode).links();
 
+    const dx = width / 2;
+    const dy = -200;
+
     svgGroup
       .selectAll("line")
       .data(links)
       .enter()
       .append("line")
-      .attr("x1", (d) => d.source.x)
-      .attr("y1", (d) => d.source.y)
-      .attr("x2", (d) => d.target.x)
-      .attr("y2", (d) => d.target.y)
+      .attr("x1", (d) => d.source.x + dx)
+      .attr("y1", (d) => d.source.y + dy)
+      .attr("x2", (d) => d.target.x + dx)
+      .attr("y2", (d) => d.target.y + dy)
       .attr("stroke", "black")
       .attr("stroke-width", 1.5);
 
@@ -46,8 +49,8 @@
       .data(rootNode.descendants())
       .enter()
       .append("circle")
-      .attr("cx", (d) => d.x)
-      .attr("cy", (d) => d.y)
+      .attr("cx", (d) => d.x + dx)
+      .attr("cy", (d) => d.y + dy)
       .attr("r", 40)
       .style("fill", "#eee")
       .style("stroke", "black")
@@ -58,8 +61,8 @@
       .data(rootNode.descendants())
       .enter()
       .append("text")
-      .attr("x", (d) => d.x)
-      .attr("y", (d) => d.y)
+      .attr("x", (d) => d.x + dx)
+      .attr("y", (d) => d.y + dy)
       .attr("dy", "0.32em")
       .attr("text-anchor", "middle")
       .attr("font-size", "3.25em")
