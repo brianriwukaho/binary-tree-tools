@@ -11,12 +11,16 @@
     drawText,
   } from "./lib/d3.helpers";
 
+  let treeDefinition: string | undefined;
+
   const width = 600;
   const height = 400;
   const dx = width / 2;
   const dy = -200;
 
-  onMount(() => {
+  const renderGraph = () => {
+    console.log(treeDefinition);
+
     const svg = d3
       .select<SVGSVGElement, unknown>("svg")
       .attr("width", width)
@@ -32,8 +36,18 @@
     drawLines(svgGroup, links, dx, dy);
     drawCircles(svgGroup, rootNode, dx, dy);
     drawText(svgGroup, rootNode, dx, dy);
+  };
+
+  onMount(() => {
+    renderGraph();
+    console.log(treeDefinition);
   });
 </script>
+
+<div>
+  <input bind:value={treeDefinition} type="text" placeholder="Enter new tree" />
+  <button on:click={renderGraph}>Render</button>
+</div>
 
 <svg width="600" height="400" />
 
