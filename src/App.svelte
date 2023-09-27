@@ -10,6 +10,7 @@
     drawCircles,
     drawText,
   } from "./lib/d3.helpers";
+  import { arrayToBinaryTree, convertToD3Node } from "./lib/tree.helpers";
 
   let treeDefinition: string | undefined;
 
@@ -19,7 +20,14 @@
   const dy = -200;
 
   const renderGraph = () => {
-    console.log(treeDefinition);
+    let treeNodeRepresentation;
+    if (treeDefinition) {
+      const arr = JSON.parse(treeDefinition);
+      const tree = arrayToBinaryTree(arr);
+      treeNodeRepresentation = convertToD3Node(tree);
+    } else {
+      treeNodeRepresentation = data;
+    }
 
     const svg = d3
       .select<SVGSVGElement, unknown>("svg")
@@ -27,8 +35,11 @@
       .attr("height", height)
       .style("border", "1px solid black");
 
+    svg.selectAll("g").remove();
+
     const svgGroup = svg.append("g");
-    const rootNode = d3.hierarchy(data) as PositionedNode;
+
+    const rootNode = d3.hierarchy(treeNodeRepresentation) as PositionedNode;
     const treeLayout = d3.tree().size([height, width]).nodeSize([125, 250]);
     const links: PositionedLink[] = treeLayout(rootNode as any).links() as any;
 
@@ -40,7 +51,6 @@
 
   onMount(() => {
     renderGraph();
-    console.log(treeDefinition);
   });
 </script>
 
