@@ -67,7 +67,28 @@ export function arrayToBinaryTree(nums: number[]): TreeNode | null {
 
   return root;
 }
+
+export function d3NodeToArray(root: any | null): string[] {
+  console.log({ root });
+  if (!root) {
+    return [];
+  }
+
+  const queue: any[] = [root];
+  const result: string[] = [];
+
+  while (queue.length) {
+    const node = queue.shift()!;
+    result.push(node.data.name);
+
+    if (node.children) {
+      queue.push(...node.children);
+    }
+  }
+
+  return result;
+}
+
 // Example usage
 const arr: number[] = [1, 2, 3, 4, 5, 6];
 const tree = arrayToBinaryTree(arr);
-console.log(convertToD3Node(tree));

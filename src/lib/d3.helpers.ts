@@ -23,7 +23,7 @@ export function initZoom(
 ) {
   const zoom = d3
     .zoom()
-    .scaleExtent([0.1, 5])
+    .scaleExtent([0.2, 5])
     .on("zoom", (event) => {
       svgGroup.attr("transform", event.transform.toString());
     });
@@ -31,7 +31,7 @@ export function initZoom(
   // @ts-ignore
   svg.call(zoom);
 
-  const initialScale = 0.2;
+  const initialScale = 0.4;
   const initialX = (width * (1 - initialScale)) / 2;
   const initialY = (height * (1 - initialScale)) / 2;
 
@@ -53,10 +53,16 @@ export function drawLines(
     .data(links)
     .enter()
     .append("line")
-    .attr("x1", (d) => d.source.x + x)
-    .attr("y1", (d) => d.source.y + y)
+    .attr("x1", (d) => {
+      if (d.target.x < d.source.x) {
+        return d.source.x + x - 30;
+      } else {
+        return d.source.x + x + 30;
+      }
+    })
+    .attr("y1", (d) => d.source.y + y + 35)
     .attr("x2", (d) => d.target.x + x)
-    .attr("y2", (d) => d.target.y + y)
+    .attr("y2", (d) => d.target.y + y - 40)
     .attr("stroke", "black")
     .attr("stroke-width", 1.5);
 }
@@ -65,20 +71,49 @@ export function drawCircles(
   svgGroup: d3.Selection<SVGGElement, unknown, HTMLElement, any>,
   rootNode: PositionedNode,
   x: number,
-  y: number
+  y: number,
+  addNode: (positionedNode: PositionedNode) => void
 ) {
   svgGroup
-    .selectAll("circle")
+    .selectAll("circle.main")
     .data(rootNode.descendants())
     .enter()
     .append("circle")
+    .attr("class", "main")
     .attr("cx", (d: PositionedNode) => d.x + x)
     .attr("cy", (d: PositionedNode) => d.y + y)
     .attr("r", 40)
     .style("fill", "#eee")
     .style("stroke", "black")
+    .style("stroke-width", "1.5");
+
+  svgGroup
+    .selectAll("circle.left")
+    .data(rootNode.descendants())
+    .enter()
+    .append("circle")
+    .attr("class", "left")
+    .attr("cx", (d: PositionedNode) => d.x + x - 30)
+    .attr("cy", (d: PositionedNode) => d.y + y + 35)
+    .attr("r", 10)
+    .style("fill", "#ddd")
+    .style("stroke", "black")
     .style("stroke-width", "1.5")
-    .on("click", (event, d) => console.log("click", d));
+    .on("click", (event, d) => addNode(d));
+
+  svgGroup
+    .selectAll("circle.right")
+    .data(rootNode.descendants())
+    .enter()
+    .append("circle")
+    .attr("class", "right")
+    .attr("cx", (d: PositionedNode) => d.x + x + 30)
+    .attr("cy", (d: PositionedNode) => d.y + y + 35)
+    .attr("r", 10)
+    .style("fill", "#ddd")
+    .style("stroke", "black")
+    .style("stroke-width", "1.5")
+    .on("click", (event, d) => addNode(d));
 }
 
 export function drawText(

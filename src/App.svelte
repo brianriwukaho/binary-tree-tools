@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as d3 from "d3";
-  import { data } from "./stub";
   import {
     type PositionedNode,
     type PositionedLink,
@@ -11,8 +10,32 @@
     drawText,
   } from "./lib/d3.helpers";
   import { arrayToBinaryTree, convertToD3Node } from "./lib/tree.helpers";
+  import Modal from "./Modal.svelte";
+  import AddNodeModal from "./AddNodeModal.svelte";
+  import { treeDefinitionStore } from "./store";
 
-  let treeDefinition: string | undefined;
+  let nodeToAdd: PositionedNode | undefined;
+  let isAddNodeModalOpen = false;
+  let isModalOpen = false;
+
+  function openModal() {
+    isModalOpen = true;
+  }
+
+  function closeModal() {
+    isModalOpen = false;
+  }
+
+  function openAddNodeModal(positionedNode: PositionedNode): void {
+    nodeToAdd = positionedNode;
+    isAddNodeModalOpen = true;
+  }
+
+  function closeAddNodeModal() {
+    isAddNodeModalOpen = false;
+  }
+
+  let treeDefinition: string;
 
   const width = 600;
   const height = 400;
@@ -20,14 +43,12 @@
   const dy = -200;
 
   const renderGraph = () => {
-    let treeNodeRepresentation;
-    if (treeDefinition) {
-      const arr = JSON.parse(treeDefinition);
-      const tree = arrayToBinaryTree(arr);
-      treeNodeRepresentation = convertToD3Node(tree);
-    } else {
-      treeNodeRepresentation = data;
-    }
+    console.log("RENDERING");
+    console.log({ treeDefinition });
+    const arr = JSON.parse(treeDefinition);
+    console.log({ arr });
+    const tree = arrayToBinaryTree(arr);
+    const treeNodeRepresentation = convertToD3Node(tree);
 
     const svg = d3
       .select<SVGSVGElement, unknown>("svg")
@@ -45,9 +66,14 @@
 
     initZoom(svg, svgGroup, height, width);
     drawLines(svgGroup, links, dx, dy);
-    drawCircles(svgGroup, rootNode, dx, dy);
+    drawCircles(svgGroup, rootNode, dx, dy, openAddNodeModal);
     drawText(svgGroup, rootNode, dx, dy);
   };
+
+  treeDefinitionStore.subscribe((value: any) => {
+    treeDefinition = value;
+    renderGraph();
+  });
 
   onMount(() => {
     renderGraph();
@@ -57,6 +83,15 @@
 <div>
   <input bind:value={treeDefinition} type="text" placeholder="Enter new tree" />
   <button on:click={renderGraph}>Render</button>
+  <button on:click={openModal}>Export</button>
+  <Modal isOpen={isModalOpen} {closeModal} {treeDefinition} />
+  <AddNodeModal
+    isOpen={isAddNodeModalOpen}
+    closeModal={closeAddNodeModal}
+    {nodeToAdd}
+    {treeDefinition}
+    {renderGraph}
+  />
 </div>
 
 <svg width="600" height="400" />
