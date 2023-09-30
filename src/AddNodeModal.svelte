@@ -17,6 +17,16 @@
       return;
     }
 
+    console.log({ nodeToAdd });
+
+    const traverseToRoot = (node: PositionedNode): PositionedNode => {
+      if (node.parent === null) {
+        return node;
+      }
+
+      return traverseToRoot(node.parent);
+    };
+
     nodeToAdd.children
       ? //@ts-ignore
         nodeToAdd.children.push({
@@ -35,7 +45,10 @@
           },
         ]);
 
-    treeDefinitionStore.set(JSON.stringify(d3NodeToArray(nodeToAdd)));
+    const root = traverseToRoot(nodeToAdd);
+
+    treeDefinitionStore.set(JSON.stringify(d3NodeToArray(root)));
+    closeModal();
   }
 
   function close() {
