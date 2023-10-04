@@ -9,33 +9,10 @@
     drawCircles,
     drawText,
   } from "./lib/d3.helpers";
-  import { arrayToBinaryTree, convertToD3Node } from "./lib/tree.helpers";
-  import Modal from "./Modal.svelte";
-  import AddNodeModal from "./AddNodeModal.svelte";
+  import { TreeNode, toD3Node } from "./lib/tree.helpers";
   import { treeDefinitionStore } from "./store";
 
-  let nodeToAdd: PositionedNode | undefined;
-  let isAddNodeModalOpen = false;
-  let isModalOpen = false;
-
-  function openModal() {
-    isModalOpen = true;
-  }
-
-  function closeModal() {
-    isModalOpen = false;
-  }
-
-  function openAddNodeModal(positionedNode: PositionedNode): void {
-    nodeToAdd = positionedNode;
-    isAddNodeModalOpen = true;
-  }
-
-  function closeAddNodeModal() {
-    isAddNodeModalOpen = false;
-  }
-
-  let treeDefinition: string;
+  let treeDefinition: TreeNode | null = null;
 
   const width = 600;
   const height = 400;
@@ -43,12 +20,7 @@
   const dy = -200;
 
   const renderGraph = () => {
-    console.log("RENDERING");
-    console.log({ treeDefinition });
-    const arr = JSON.parse(treeDefinition);
-    console.log({ arr });
-    const tree = arrayToBinaryTree(arr);
-    const treeNodeRepresentation = convertToD3Node(tree);
+    const treeNodeRepresentation = toD3Node(treeDefinition);
 
     const svg = d3
       .select<SVGSVGElement, unknown>("svg")
@@ -66,7 +38,7 @@
 
     initZoom(svg, svgGroup, height, width);
     drawLines(svgGroup, links, dx, dy);
-    drawCircles(svgGroup, rootNode, dx, dy, openAddNodeModal);
+    drawCircles(svgGroup, rootNode, dx, dy, () => console.log("clicked"));
     drawText(svgGroup, rootNode, dx, dy);
   };
 
@@ -80,21 +52,4 @@
   });
 </script>
 
-<div>
-  <input bind:value={treeDefinition} type="text" placeholder="Enter new tree" />
-  <button on:click={renderGraph}>Render</button>
-  <button on:click={openModal}>Export</button>
-  <Modal isOpen={isModalOpen} {closeModal} {treeDefinition} />
-  <AddNodeModal
-    isOpen={isAddNodeModalOpen}
-    closeModal={closeAddNodeModal}
-    {nodeToAdd}
-    {treeDefinition}
-    {renderGraph}
-  />
-</div>
-
 <svg width="600" height="400" />
-
-<style>
-</style>
