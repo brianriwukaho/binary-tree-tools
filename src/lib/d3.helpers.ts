@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 
 export interface NodeData {
+  id: string;
   name: string;
   children?: NodeData[];
 }
@@ -72,7 +73,10 @@ export function drawCircles(
   rootNode: PositionedNode,
   x: number,
   y: number,
-  addNode: (positionedNode: PositionedNode) => void
+  addNode: (
+    positionedNode: PositionedNode,
+    childDirection: "left" | "right"
+  ) => void
 ) {
   svgGroup
     .selectAll("circle.main")
@@ -99,7 +103,7 @@ export function drawCircles(
     .style("fill", "#ddd")
     .style("stroke", "black")
     .style("stroke-width", "1.5")
-    .on("click", (event, d) => addNode(d));
+    .on("click", (_, d) => addNode(d, "left"));
 
   svgGroup
     .selectAll("circle.right")
@@ -113,7 +117,7 @@ export function drawCircles(
     .style("fill", "#ddd")
     .style("stroke", "black")
     .style("stroke-width", "1.5")
-    .on("click", (event, d) => addNode(d));
+    .on("click", (_, d) => addNode(d, "right"));
 }
 
 export function drawText(
