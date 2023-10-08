@@ -147,12 +147,54 @@ export const calculateTraversals = (TreeNode: TreeNode | null) => {
   };
 };
 
-// const root = new TreeNode("A");
-// root.left = new TreeNode("B");
-// root.right = new TreeNode("C");
-// root.left.left = new TreeNode("D");
-// root.left.right = new TreeNode("E");
-// root.right.left = new TreeNode("F");
-// root.right.right = new TreeNode("G");
+export const treeToLevelOrderArrayRepresentation = (root: TreeNode | null) => {
+  if (root === null) {
+    return [];
+  }
 
-// console.log(calculateTraversals(root));
+  const levelOrder: (string | null)[] = [];
+  const queue: (TreeNode | null)[] = [];
+
+  queue.push(root);
+  let insertNulls = true;
+
+  while (queue.length) {
+    const levelSize = queue.length;
+
+    let nextLevelHasNodes = false;
+
+    for (let i = 0; i < levelSize; i++) {
+      const node = queue.shift();
+
+      if (node !== null && node !== undefined) {
+        levelOrder.push(node.val);
+        queue.push(node.left);
+        queue.push(node.right);
+
+        if (node.left || node.right) {
+          nextLevelHasNodes = true;
+        }
+      } else if (insertNulls) {
+        levelOrder.push(null);
+        queue.push(null, null);
+      }
+    }
+
+    if (!nextLevelHasNodes) {
+      insertNulls = false;
+    }
+  }
+
+  while (levelOrder[levelOrder.length - 1] === null) {
+    levelOrder.pop();
+  }
+
+  return levelOrder;
+};
+
+const root = new TreeNode("1");
+root.left = new TreeNode("2");
+root.left.left = new TreeNode("3");
+root.left.left.left = new TreeNode("4");
+
+console.log(treeToLevelOrderArrayRepresentation(root));
