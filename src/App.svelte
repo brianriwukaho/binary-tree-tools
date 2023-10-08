@@ -9,18 +9,45 @@
     drawCircles,
     drawText,
   } from "./lib/d3.helpers";
-  import { TreeNode, findTreeNode, toD3Node } from "./lib/tree.helpers";
+  import { TreeNode, calculateTraversals, findTreeNode, toD3Node } from "./lib/tree.helpers";
 
   let treeDefinition: TreeNode | null = new TreeNode("1");
   let valueToAdd: string = "";
   let selectedNode: TreeNode | null = null;
-  let childDirection: "left" | "right";
-  let showModal = false;
+  let childDirection: "left" | "right" | null = null;
+  let showAddNodeModal = false;
+  let showTraversalsModal = false;
+  let showCodeModal = false;
+
+  let { levelOrder, preOrder, inOrder, postOrder } = calculateTraversals(treeDefinition)
 
   const width = 600;
   const height = 400;
   const dx = width / 2;
   const dy = -200;
+
+  const openCodeModal = () => {
+    showCodeModal = true;
+  }; 
+  
+  const closeCodeModal = () => {
+    showCodeModal = false;
+  };
+
+  const openTraversalsModal = () => {
+    let { levelOrder: a, preOrder: b, inOrder: c, postOrder: d }  = calculateTraversals(treeDefinition)
+
+    levelOrder = a
+    preOrder = b
+    inOrder = c
+    postOrder = d
+
+    showTraversalsModal = true;
+  };
+
+  const closeTraversalsModal = () => {
+    showTraversalsModal = false;
+  };
 
   const openAddNodeModal = (
     positionedNode: PositionedNode,
@@ -28,15 +55,23 @@
   ) => {
     selectedNode = findTreeNode(treeDefinition, positionedNode.data.id);
     childDirection = direction;
-    showModal = true;
+    showAddNodeModal = true;
   };
 
   const closeAddNodeModal = () => {
     selectedNode = null;
-    showModal = false;
+    showAddNodeModal = false;
   };
 
   const addNode = () => {
+    if (!selectedNode) {
+      return;
+    }
+
+    if (childDirection !== "left" && childDirection !== "right") {
+      return;
+    }
+
     if (childDirection === "left") {
       selectedNode.left = new TreeNode(valueToAdd);
     } else if (childDirection === "right") {
@@ -45,7 +80,7 @@
     renderGraph();
     childDirection = null;
     valueToAdd = "";
-    showModal = false;
+    showAddNodeModal = false;
   };
 
   const renderGraph = () => {
@@ -76,10 +111,49 @@
   });
 </script>
 
-{#if showModal}
+<div>
+  <button on:click={openCodeModal}>Code</button>
+  <button on:click={openTraversalsModal}>Traversals</button>
+</div>
+
+{#if showCodeModal}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="modal" on:click={closeCodeModal}>
+    <div class="modal-content" on:click={(e) => e.stopPropagation()}>
+      <p>&gt; Array Representation</p>
+      <pre></pre>
+      <p>&gt; Manual Representation</p>
+      <pre></pre>
+      <p>&gt; Link to Share</p>
+      <pre></pre>
+    </div>
+  </div>
+{/if}
+
+
+{#if showTraversalsModal}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="modal" on:click={closeTraversalsModal}>
+    <div class="modal-content" on:click={(e) => e.stopPropagation()}>
+      <h3>Level order</h3>
+      <pre>{JSON.stringify(levelOrder)}</pre>
+      <h3>Pre order</h3>
+      <pre>{JSON.stringify(preOrder)}</pre>
+      <h3>In order</h3>
+      <pre>{JSON.stringify(inOrder)}</pre>
+      <h3>Post order</h3>
+      <pre>{JSON.stringify(postOrder)}</pre>
+    </div>
+  </div>
+{/if}
+
+{#if showAddNodeModal}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="modal" on:click={closeAddNodeModal}>
     <div class="modal-content" on:click={(e) => e.stopPropagation()}>
-      <span on:click={closeAddNodeModal}>Close</span>
       <input bind:value={valueToAdd} />
       <button on:click={addNode}>Add node</button>
     </div>
@@ -91,17 +165,26 @@
 <style>
   .modal {
     position: fixed;
-    top: 0;
+    z-index: 1;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border: 1px solid #888;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
-  .modal-content {
-    padding: 20px;
-    border-radius: 4px;
   }
 </style>

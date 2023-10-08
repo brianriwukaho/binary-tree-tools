@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 interface D3Node<T> {
   id: string;
   name: T;
@@ -8,32 +10,16 @@ interface D3Node<T> {
 
 export class TreeNode {
   val: string;
-  id?: string;
+  id: string;
   left: TreeNode | null;
   right: TreeNode | null;
   constructor(val?: string, left?: TreeNode | null, right?: TreeNode | null) {
-    this.id = generateUUID();
+    this.id = uuidv4();
     this.val = val === undefined ? "" : val;
     this.left = left === undefined ? null : left;
     this.right = right === undefined ? null : right;
   }
 }
-
-const generateUUID = () => {
-  const array = new Uint8Array(16);
-  window.crypto.getRandomValues(array);
-  array[6] = (array[6] & 0x0f) | 0x40;
-  array[8] = (array[8] & 0x3f) | 0x80;
-
-  return Array.from(array)
-    .map((byte, index) => {
-      return (
-        (index === 4 || index === 6 || index === 8 || index === 10 ? "-" : "") +
-        byte.toString(16).padStart(2, "0")
-      );
-    })
-    .join("");
-};
 
 export const findTreeNode = (
   root: TreeNode | null,
@@ -107,3 +93,66 @@ export const toD3Node = (
 
   return d3Node;
 };
+
+export const calculateTraversals = (TreeNode: TreeNode | null) => {
+  const levelOrder: string[] = [];
+  const inOrder: string[] = [];
+  const preOrder: string[] = [];
+  const postOrder: string[] = [];
+
+  const bfs = (TreeNode: TreeNode | null) => {
+    if (!TreeNode) {
+      return;
+    }
+
+    const queue: TreeNode[] = [];
+
+    queue.push(TreeNode);
+
+    while (queue.length) {
+      const node = queue.shift()!;
+
+      levelOrder.push(node.val);
+
+      if (node.left) {
+        queue.push(node.left);
+      }
+
+      if (node.right) {
+        queue.push(node.right);
+      }
+    }
+  };
+
+  const dfs = (TreeNode: TreeNode | null) => {
+    if (!TreeNode) {
+      return;
+    }
+
+    preOrder.push(TreeNode.val);
+    dfs(TreeNode.left);
+    inOrder.push(TreeNode.val);
+    dfs(TreeNode.right);
+    postOrder.push(TreeNode.val);
+  };
+
+  dfs(TreeNode);
+  bfs(TreeNode);
+
+  return {
+    levelOrder,
+    inOrder,
+    preOrder,
+    postOrder,
+  };
+};
+
+// const root = new TreeNode("A");
+// root.left = new TreeNode("B");
+// root.right = new TreeNode("C");
+// root.left.left = new TreeNode("D");
+// root.left.right = new TreeNode("E");
+// root.right.left = new TreeNode("F");
+// root.right.right = new TreeNode("G");
+
+// console.log(calculateTraversals(root));
