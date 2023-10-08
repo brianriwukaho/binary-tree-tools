@@ -1,7 +1,9 @@
 interface D3Node<T> {
   id: string;
   name: T;
+  side?: "left" | "right";
   children?: D3Node<T>[];
+  isGhost?: boolean;
 }
 
 export class TreeNode {
@@ -60,7 +62,10 @@ export const findTreeNode = (
   return null;
 };
 
-export const toD3Node = (root: TreeNode | null): D3Node<string> | null => {
+export const toD3Node = (
+  root: TreeNode | null,
+  side?: "left" | "right"
+): D3Node<string> | null => {
   if (!root) {
     return null;
   }
@@ -68,16 +73,32 @@ export const toD3Node = (root: TreeNode | null): D3Node<string> | null => {
   const d3Node: D3Node<string> = {
     id: root.id,
     name: root.val.toString(),
+    side: side,
   };
 
   const children: D3Node<string>[] = [];
 
   if (root.left) {
-    children.push(toD3Node(root.left)!);
+    children.push(toD3Node(root.left, "left")!);
   }
 
   if (root.right) {
-    children.push(toD3Node(root.right)!);
+    children.push(toD3Node(root.right, "right")!);
+  }
+
+  if (children.length === 1) {
+    const ghostNode: D3Node<string> = {
+      id: root.id,
+      name: "",
+      side: children[0].side === "left" ? "right" : "left",
+      isGhost: true,
+    };
+
+    if (children[0].side === "left") {
+      children.push(ghostNode);
+    } else {
+      children.unshift(ghostNode);
+    }
   }
 
   if (children.length) {

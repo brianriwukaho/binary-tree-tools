@@ -3,7 +3,9 @@ import * as d3 from "d3";
 export interface NodeData {
   id: string;
   name: string;
+  side?: "left" | "right";
   children?: NodeData[];
+  isGhost?: boolean;
 }
 
 export type PositionedNode = d3.HierarchyNode<NodeData> & {
@@ -65,7 +67,10 @@ export function drawLines(
     .attr("x2", (d) => d.target.x + x)
     .attr("y2", (d) => d.target.y + y - 40)
     .attr("stroke", "black")
-    .attr("stroke-width", 1.5);
+    .attr("stroke-width", 1.5)
+    .style("visibility", (d: PositionedLink) =>
+      d.target.data.isGhost ? "hidden" : "visible"
+    );
 }
 
 export function drawCircles(
@@ -89,7 +94,10 @@ export function drawCircles(
     .attr("r", 40)
     .style("fill", "#eee")
     .style("stroke", "black")
-    .style("stroke-width", "1.5");
+    .style("stroke-width", "1.5")
+    .style("visibility", (d: PositionedNode) =>
+      d.data.isGhost ? "hidden" : "visible"
+    );
 
   svgGroup
     .selectAll("circle.left")
@@ -103,6 +111,9 @@ export function drawCircles(
     .style("fill", "#ddd")
     .style("stroke", "black")
     .style("stroke-width", "1.5")
+    .style("visibility", (d: PositionedNode) =>
+      d.data.isGhost ? "hidden" : "visible"
+    )
     .on("click", (_, d) => addNode(d, "left"));
 
   svgGroup
@@ -117,6 +128,9 @@ export function drawCircles(
     .style("fill", "#ddd")
     .style("stroke", "black")
     .style("stroke-width", "1.5")
+    .style("visibility", (d: PositionedNode) =>
+      d.data.isGhost ? "hidden" : "visible"
+    )
     .on("click", (_, d) => addNode(d, "right"));
 }
 
