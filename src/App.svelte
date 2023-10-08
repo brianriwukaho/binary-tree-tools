@@ -116,7 +116,7 @@
   <button on:click={openTraversalsModal}>Traversals</button>
 </div>
 
-{#if showCodeModal}
+{#if showCodeModal  }
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="modal" on:click={closeCodeModal}>
@@ -172,10 +172,15 @@
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
+    
+  }
+
+  pre {
+    background-color: black;
   }
 
   .modal-content {
-    background-color: black;
+    background-color: darkslategray;
     position: absolute;
     top: 50%;
     left: 50%;
