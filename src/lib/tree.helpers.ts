@@ -206,15 +206,15 @@ export const arrayRepresentationToTree = (arr: (string | null)[]) => {
     const node = queue.shift();
 
     if (node) {
-      if (arr[i] !== null) {
+      if (arr[i]) {
         node.left = new TreeNode(arr[i]!);
-        queue.push(node.left);
       }
+      queue.push(node.left);
 
-      if (arr[i + 1] !== null) {
+      if (arr[i + 1]) {
         node.right = new TreeNode(arr[i + 1]!);
-        queue.push(node.right);
       }
+      queue.push(node.right);
     }
   }
 
