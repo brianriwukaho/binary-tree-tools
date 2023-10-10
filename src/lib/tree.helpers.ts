@@ -220,10 +220,3 @@ export const arrayRepresentationToTree = (arr: (string | null)[]) => {
 
   return root;
 };
-
-const root = new TreeNode("1");
-root.left = new TreeNode("2");
-root.left.left = new TreeNode("3");
-root.left.left.left = new TreeNode("4");
-
-console.log(treeToLevelOrderArrayRepresentation(root));

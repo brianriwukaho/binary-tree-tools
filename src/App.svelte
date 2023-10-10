@@ -9,38 +9,61 @@
     drawCircles,
     drawText,
   } from "./lib/d3.helpers";
-  import { TreeNode, calculateTraversals, findTreeNode, toD3Node } from "./lib/tree.helpers";
+  import {
+    TreeNode,
+    arrayRepresentationToTree,
+    calculateTraversals,
+    findTreeNode,
+    toD3Node,
+    treeToLevelOrderArrayRepresentation,
+  } from "./lib/tree.helpers";
 
   let treeDefinition: TreeNode | null = new TreeNode("1");
   let valueToAdd: string = "";
+  let arrayRepresentation: string = "";
   let selectedNode: TreeNode | null = null;
   let childDirection: "left" | "right" | null = null;
   let showAddNodeModal = false;
   let showTraversalsModal = false;
   let showCodeModal = false;
+  let showImportModal = false;
 
-  let { levelOrder, preOrder, inOrder, postOrder } = calculateTraversals(treeDefinition)
+  let { levelOrder, preOrder, inOrder, postOrder } =
+    calculateTraversals(treeDefinition);
 
   const width = 600;
   const height = 400;
   const dx = width / 2;
   const dy = -200;
 
+  const openImportModal = () => {
+    showImportModal = true;
+  };
+
+  const closeImportModal = () => {
+    showImportModal = false;
+  };
+
   const openCodeModal = () => {
     showCodeModal = true;
-  }; 
-  
+  };
+
   const closeCodeModal = () => {
     showCodeModal = false;
   };
 
   const openTraversalsModal = () => {
-    let { levelOrder: a, preOrder: b, inOrder: c, postOrder: d }  = calculateTraversals(treeDefinition)
+    let {
+      levelOrder: a,
+      preOrder: b,
+      inOrder: c,
+      postOrder: d,
+    } = calculateTraversals(treeDefinition);
 
-    levelOrder = a
-    preOrder = b
-    inOrder = c
-    postOrder = d
+    levelOrder = a;
+    preOrder = b;
+    inOrder = c;
+    postOrder = d;
 
     showTraversalsModal = true;
   };
@@ -83,6 +106,11 @@
     showAddNodeModal = false;
   };
 
+  const importTree = () => {
+    treeDefinition = arrayRepresentationToTree(JSON.parse(arrayRepresentation));
+    renderGraph();
+  };
+
   const renderGraph = () => {
     const treeNodeRepresentation = toD3Node(treeDefinition);
 
@@ -112,25 +140,39 @@
 </script>
 
 <div>
+  <button on:click={openImportModal}>Import</button>
   <button on:click={openCodeModal}>Code</button>
   <button on:click={openTraversalsModal}>Traversals</button>
 </div>
 
-{#if showCodeModal  }
+{#if showImportModal}
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="modal" on:click={closeImportModal}>
+    <div class="modal-content" on:click={(e) => e.stopPropagation()}>
+      <p>Yup, paste that array representation from leetcode</p>
+      <input bind:value={arrayRepresentation} />
+      <button on:click={importTree}>import</button>
+    </div>
+  </div>
+{/if}
+
+{#if showCodeModal}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="modal" on:click={closeCodeModal}>
     <div class="modal-content" on:click={(e) => e.stopPropagation()}>
       <p>&gt; Array Representation</p>
-      <pre></pre>
+      <pre>{JSON.stringify(
+          treeToLevelOrderArrayRepresentation(treeDefinition)
+        )}</pre>
       <p>&gt; Manual Representation</p>
-      <pre></pre>
+      <pre />
       <p>&gt; Link to Share</p>
-      <pre></pre>
+      <pre />
     </div>
   </div>
 {/if}
-
 
 {#if showTraversalsModal}
   <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -171,16 +213,12 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-    
   }
 
   pre {
-    background-color: black;
   }
 
   .modal-content {
-    background-color: darkslategray;
     position: absolute;
     top: 50%;
     left: 50%;
